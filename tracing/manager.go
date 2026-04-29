@@ -64,9 +64,6 @@ func (m *Manager) GenerateTraceID() string {
 }
 
 func (m *Manager) Trace(ctx context.Context) context.Context {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
 	if ctx == nil {
 		ctx = context.Background()
 	}
