@@ -51,6 +51,7 @@ func (c *Controller) Listen(signals []os.Signal) error {
 
 	c.signals = signals
 	c.signal = make(chan os.Signal, 1)
+
 	return nil
 }
 

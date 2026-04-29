@@ -50,67 +50,68 @@ func TestController(t *testing.T) {
 			actual++
 		}
 
-		controller := NewController(app)
+		c := NewController(app)
 
-		err := controller.Run()
+		err := c.Run()
 		require.Nil(t, err)
+
 		require.Equal(t, expected, actual)
 	})
 
 	t.Run("Run_MakeGoroutine", func(t *testing.T) {
-		{
-			expected := 2
-			actual := 0
+		expected := 2
+		actual := 0
 
-			app := &testApp{}
+		app := &testApp{}
 
-			app.onSetUp = func(ctx context.Context, makeGo MakeGoroutine) error {
-				makeGo(func() {
-					select {
-					case <-ctx.Done():
-						actual++
-					}
-				})
-				return nil
-			}
+		app.onSetUp = func(ctx context.Context, makeGo MakeGoroutine) error {
+			makeGo(func() {
+				select {
+				case <-ctx.Done():
+					actual++
+				}
+			})
 
-			app.onTearDown = func() {
-				actual++
-			}
-
-			controller := NewController(app)
-
-			err := controller.Run()
-			require.Nil(t, err)
-			require.Equal(t, expected, actual)
+			return nil
 		}
+
+		app.onTearDown = func() {
+			actual++
+		}
+
+		c := NewController(app)
+
+		err := c.Run()
+		require.Nil(t, err)
+
+		require.Equal(t, expected, actual)
 	})
 
 	t.Run("Run_Listen", func(t *testing.T) {
-		{
-			expected := 2
-			actual := 0
+		expected := 2
+		actual := 0
 
-			app := &testApp{}
+		app := &testApp{}
 
-			app.onSetUp = func(ctx context.Context, makeGo MakeGoroutine) error {
-				actual++
-				return nil
-			}
-
-			app.onTearDown = func() {
-				actual++
-			}
-
-			controller := NewController(app)
-			controller.Listen([]os.Signal{syscall.SIGTERM})
-
-			go testSendStopSignal(controller)
-
-			err := controller.Run()
-			require.Nil(t, err)
-			require.Equal(t, expected, actual)
+		app.onSetUp = func(ctx context.Context, makeGo MakeGoroutine) error {
+			actual++
+			return nil
 		}
+
+		app.onTearDown = func() {
+			actual++
+		}
+
+		c := NewController(app)
+
+		c.Listen([]os.Signal{syscall.SIGTERM})
+
+		go testSendStopSignal(c)
+
+		err := c.Run()
+		require.Nil(t, err)
+
+		require.Equal(t, expected, actual)
 	})
 
 	t.Run("Run_WithContext", func(t *testing.T) {
@@ -131,14 +132,17 @@ func TestController(t *testing.T) {
 			actual++
 		}
 
-		controller := NewController(app)
-		controller.WithContext(ctx, cancel)
-		controller.Listen([]os.Signal{syscall.SIGTERM})
+		c := NewController(app)
 
-		go testSendStopSignal(controller)
+		c.WithContext(ctx, cancel)
 
-		err := controller.Run()
+		c.Listen([]os.Signal{syscall.SIGTERM})
+
+		go testSendStopSignal(c)
+
+		err := c.Run()
 		require.Nil(t, err)
+
 		require.Equal(t, expected, actual)
 	})
 
@@ -160,14 +164,17 @@ func TestController(t *testing.T) {
 			actual++
 		}
 
-		controller := NewController(app)
-		controller.WithContext(ctx, cancel)
-		controller.Listen([]os.Signal{syscall.SIGTERM})
+		c := NewController(app)
+
+		c.WithContext(ctx, cancel)
+
+		c.Listen([]os.Signal{syscall.SIGTERM})
 
 		cancel()
 
-		err := controller.Run()
+		err := c.Run()
 		require.Nil(t, err)
+
 		require.Equal(t, expected, actual)
 	})
 
@@ -180,10 +187,11 @@ func TestController(t *testing.T) {
 			return expected
 		}
 
-		controller := NewController(app)
+		c := NewController(app)
 
-		err := controller.Run()
+		err := c.Run()
 		require.NotNil(t, err)
+
 		require.Equal(t, expected, err)
 	})
 }

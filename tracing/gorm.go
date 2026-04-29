@@ -49,7 +49,9 @@ func NewGormLogger(config gormlogger.Config) gormlogger.Interface {
 
 func (l *gormLogger) LogMode(level gormlogger.LogLevel) gormlogger.Interface {
 	newLogger := *l
+
 	newLogger.config.LogLevel = level
+
 	return &newLogger
 }
 
