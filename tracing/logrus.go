@@ -8,9 +8,9 @@ type LogrusHook struct {
 	m *Manager
 }
 
-func NewLogrusHook(m *Manager) logrus.Hook {
+func NewLogrusHook(manager *Manager) logrus.Hook {
 	return &LogrusHook{
-		m: m,
+		m: manager,
 	}
 }
 

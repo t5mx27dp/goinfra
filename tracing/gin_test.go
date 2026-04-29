@@ -15,11 +15,11 @@ func TestGinMiddleware(t *testing.T) {
 	keys := []string{"key1", "key2"}
 	values := []string{"value1", "value2"}
 
-	m := NewManager(keys[0])
+	manager := NewManager(keys[0])
 
-	m.WithKey(keys[1])
+	manager.WithKey(keys[1])
 
-	m.SetTraceIDGenerator(func() string {
+	manager.SetTraceIDGenerator(func() string {
 		return values[0]
 	})
 
@@ -27,7 +27,7 @@ func TestGinMiddleware(t *testing.T) {
 
 	router := gin.New()
 
-	router.Use(GinMiddleware(m))
+	router.Use(GinMiddleware(manager))
 
 	router.GET("/", func(c *gin.Context) {
 		ctx := c.Request.Context()

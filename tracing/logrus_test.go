@@ -13,9 +13,9 @@ func TestLogrusHook(t *testing.T) {
 	key := "key"
 	value := "value"
 
-	m := NewManager(key)
+	manager := NewManager(key)
 
-	m.SetTraceIDGenerator(func() string {
+	manager.SetTraceIDGenerator(func() string {
 		return value
 	})
 
@@ -29,9 +29,9 @@ func TestLogrusHook(t *testing.T) {
 	log.SetOutput(&buffer)
 	log.SetFormatter(&logrus.JSONFormatter{})
 
-	log.AddHook(NewLogrusHook(m))
+	log.AddHook(NewLogrusHook(manager))
 
-	ctx := m.Trace(nil)
+	ctx := manager.Trace(nil)
 
 	log.WithContext(ctx).Error("err")
 

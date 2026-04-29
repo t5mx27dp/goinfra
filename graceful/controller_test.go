@@ -29,9 +29,9 @@ func (app *testApp) TearDown() {
 	}
 }
 
-func testSendStopSignal(c *Controller) {
-	i := rand.Intn(len(c.signals))
-	c.signal <- c.signals[i]
+func testSendStopSignal(controller *Controller) {
+	i := rand.Intn(len(controller.signals))
+	controller.signal <- controller.signals[i]
 }
 
 func TestController(t *testing.T) {
@@ -50,9 +50,9 @@ func TestController(t *testing.T) {
 			actual++
 		}
 
-		c := NewController(app)
+		controller := NewController(app)
 
-		err := c.Run()
+		err := controller.Run()
 		require.Nil(t, err)
 
 		require.Equal(t, expected, actual)
@@ -79,9 +79,9 @@ func TestController(t *testing.T) {
 			actual++
 		}
 
-		c := NewController(app)
+		controller := NewController(app)
 
-		err := c.Run()
+		err := controller.Run()
 		require.Nil(t, err)
 
 		require.Equal(t, expected, actual)
@@ -102,13 +102,13 @@ func TestController(t *testing.T) {
 			actual++
 		}
 
-		c := NewController(app)
+		controller := NewController(app)
 
-		c.Listen([]os.Signal{syscall.SIGTERM})
+		controller.Listen([]os.Signal{syscall.SIGTERM})
 
-		go testSendStopSignal(c)
+		go testSendStopSignal(controller)
 
-		err := c.Run()
+		err := controller.Run()
 		require.Nil(t, err)
 
 		require.Equal(t, expected, actual)
@@ -132,15 +132,15 @@ func TestController(t *testing.T) {
 			actual++
 		}
 
-		c := NewController(app)
+		controller := NewController(app)
 
-		c.WithContext(ctx, cancel)
+		controller.WithContext(ctx, cancel)
 
-		c.Listen([]os.Signal{syscall.SIGTERM})
+		controller.Listen([]os.Signal{syscall.SIGTERM})
 
-		go testSendStopSignal(c)
+		go testSendStopSignal(controller)
 
-		err := c.Run()
+		err := controller.Run()
 		require.Nil(t, err)
 
 		require.Equal(t, expected, actual)
@@ -164,15 +164,15 @@ func TestController(t *testing.T) {
 			actual++
 		}
 
-		c := NewController(app)
+		controller := NewController(app)
 
-		c.WithContext(ctx, cancel)
+		controller.WithContext(ctx, cancel)
 
-		c.Listen([]os.Signal{syscall.SIGTERM})
+		controller.Listen([]os.Signal{syscall.SIGTERM})
 
 		cancel()
 
-		err := c.Run()
+		err := controller.Run()
 		require.Nil(t, err)
 
 		require.Equal(t, expected, actual)
@@ -187,9 +187,9 @@ func TestController(t *testing.T) {
 			return expected
 		}
 
-		c := NewController(app)
+		controller := NewController(app)
 
-		err := c.Run()
+		err := controller.Run()
 		require.NotNil(t, err)
 
 		require.Equal(t, expected, err)

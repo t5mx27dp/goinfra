@@ -6,12 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GinMiddleware(m *Manager) gin.HandlerFunc {
+func GinMiddleware(manager *Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx := m.Trace(c.Request.Context())
+		ctx := manager.Trace(c.Request.Context())
 
-		for _, key := range m.Keys() {
-			if key == m.Key() {
+		for _, key := range manager.Keys() {
+			if key == manager.Key() {
 				continue
 			}
 			ctx = context.WithValue(ctx, key, c.GetHeader(key))

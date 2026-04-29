@@ -11,40 +11,40 @@ func TestManager(t *testing.T) {
 	t.Run("Keys", func(t *testing.T) {
 		keys := []string{"key1", "key2"}
 
-		m := NewManager(keys[0])
+		manager := NewManager(keys[0])
 
-		m.WithKey(keys[1])
+		manager.WithKey(keys[1])
 
-		require.Equal(t, keys[0], m.Key())
-		require.Equal(t, keys, m.Keys())
+		require.Equal(t, keys[0], manager.Key())
+		require.Equal(t, keys, manager.Keys())
 	})
 
 	t.Run("GenerateTraceID", func(t *testing.T) {
 		key := "key"
 		value := "value"
 
-		m := NewManager(key)
+		manager := NewManager(key)
 
-		require.Equal(t, 36, len(m.GenerateTraceID()))
+		require.Equal(t, 36, len(manager.GenerateTraceID()))
 
-		m.SetTraceIDGenerator(func() string {
+		manager.SetTraceIDGenerator(func() string {
 			return value
 		})
 
-		require.Equal(t, value, m.GenerateTraceID())
+		require.Equal(t, value, manager.GenerateTraceID())
 	})
 
 	t.Run("Trace_Context_Nil", func(t *testing.T) {
 		key := "key"
 		value := "value"
 
-		m := NewManager(key)
+		manager := NewManager(key)
 
-		m.SetTraceIDGenerator(func() string {
+		manager.SetTraceIDGenerator(func() string {
 			return value
 		})
 
-		ctx := m.Trace(nil)
+		ctx := manager.Trace(nil)
 
 		require.Equal(t, value, ctx.Value(key))
 	})
@@ -53,15 +53,15 @@ func TestManager(t *testing.T) {
 		key := "key"
 		value := "value"
 
-		m := NewManager(key)
+		manager := NewManager(key)
 
-		m.SetTraceIDGenerator(func() string {
+		manager.SetTraceIDGenerator(func() string {
 			return value
 		})
 
 		ctx := context.Background()
 
-		ctx = m.Trace(ctx)
+		ctx = manager.Trace(ctx)
 
 		require.Equal(t, value, ctx.Value(key))
 	})
@@ -70,9 +70,9 @@ func TestManager(t *testing.T) {
 		key := "key"
 		value := "value"
 
-		m := NewManager(key)
+		manager := NewManager(key)
 
-		m.SetTraceIDGenerator(func() string {
+		manager.SetTraceIDGenerator(func() string {
 			return value
 		})
 
@@ -80,7 +80,7 @@ func TestManager(t *testing.T) {
 
 		ctx = context.WithValue(ctx, key, "test")
 
-		ctx = m.Trace(ctx)
+		ctx = manager.Trace(ctx)
 
 		require.Equal(t, value, ctx.Value(key))
 	})
@@ -88,9 +88,9 @@ func TestManager(t *testing.T) {
 	t.Run("Parse_Context_Nil", func(t *testing.T) {
 		key := "key"
 
-		m := NewManager(key)
+		manager := NewManager(key)
 
-		labels := m.Parse(nil)
+		labels := manager.Parse(nil)
 
 		require.Equal(t, 0, len(labels))
 	})
@@ -98,11 +98,11 @@ func TestManager(t *testing.T) {
 	t.Run("Parse_Context_Not_Nil", func(t *testing.T) {
 		key := "key"
 
-		m := NewManager(key)
+		manager := NewManager(key)
 
 		ctx := context.Background()
 
-		labels := m.Parse(ctx)
+		labels := manager.Parse(ctx)
 
 		require.Equal(t, "", labels[key])
 	})
@@ -111,13 +111,13 @@ func TestManager(t *testing.T) {
 		key := "key"
 		value := "value"
 
-		m := NewManager(key)
+		manager := NewManager(key)
 
 		ctx := context.Background()
 
 		ctx = context.WithValue(ctx, key, value)
 
-		labels := m.Parse(ctx)
+		labels := manager.Parse(ctx)
 
 		require.Equal(t, value, labels[key])
 	})
