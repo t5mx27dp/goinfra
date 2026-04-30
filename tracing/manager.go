@@ -7,7 +7,28 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	globalManager      *Manager
+	globalManagerMutex sync.RWMutex
+)
+
+func GetGlobalManager() *Manager {
+	globalManagerMutex.RLock()
+	defer globalManagerMutex.RUnlock()
+
+	return globalManager
+}
+
+func SetGlobalManager(manager *Manager) {
+	globalManagerMutex.Lock()
+	defer globalManagerMutex.Unlock()
+
+	globalManager = manager
+}
+
 type GenerateTraceID func() string
+
+type contextKey string
 
 type Manager struct {
 	key  string
@@ -26,9 +47,6 @@ func NewManager(key string) *Manager {
 }
 
 func (m *Manager) Key() string {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
 	return m.key
 }
 
@@ -68,7 +86,11 @@ func (m *Manager) Trace(ctx context.Context) context.Context {
 		ctx = context.Background()
 	}
 
-	return context.WithValue(ctx, m.key, m.GenerateTraceID())
+	return context.WithValue(ctx, contextKey(m.key), m.GenerateTraceID())
+}
+
+func (m *Manager) TraceWithValue(ctx context.Context, key, value string) context.Context {
+	return context.WithValue(ctx, contextKey(key), value)
 }
 
 func (m *Manager) Parse(ctx context.Context) map[string]string {
@@ -82,7 +104,7 @@ func (m *Manager) Parse(ctx context.Context) map[string]string {
 	labels := make(map[string]string)
 
 	for _, key := range m.keys {
-		value := ctx.Value(key)
+		value := ctx.Value(contextKey(key))
 		if value == nil {
 			labels[key] = ""
 		} else {

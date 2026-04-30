@@ -7,6 +7,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestGlobalManager(t *testing.T) {
+	t.Cleanup(func() {
+		SetGlobalManager(nil)
+	})
+
+	require.Nil(t, globalManager)
+
+	manager := NewManager("")
+
+	SetGlobalManager(manager)
+
+	require.Equal(t, globalManager, GetGlobalManager())
+}
+
 func TestManager(t *testing.T) {
 	t.Run("Keys", func(t *testing.T) {
 		keys := []string{"key1", "key2"}
@@ -34,7 +48,7 @@ func TestManager(t *testing.T) {
 		require.Equal(t, value, manager.GenerateTraceID())
 	})
 
-	t.Run("Trace_Context_Nil", func(t *testing.T) {
+	t.Run("Trace_Parse_Context_Nil", func(t *testing.T) {
 		key := "key"
 		value := "value"
 
@@ -46,10 +60,12 @@ func TestManager(t *testing.T) {
 
 		ctx := manager.Trace(nil)
 
-		require.Equal(t, value, ctx.Value(key))
+		labels := manager.Parse(ctx)
+
+		require.Equal(t, value, labels[key])
 	})
 
-	t.Run("Trace_Context_Not_Nil", func(t *testing.T) {
+	t.Run("Trace_Parse_Context_Not_Nil", func(t *testing.T) {
 		key := "key"
 		value := "value"
 
@@ -62,60 +78,27 @@ func TestManager(t *testing.T) {
 		ctx := context.Background()
 
 		ctx = manager.Trace(ctx)
-
-		require.Equal(t, value, ctx.Value(key))
-	})
-
-	t.Run("Trace_Context_Key_Exists", func(t *testing.T) {
-		key := "key"
-		value := "value"
-
-		manager := NewManager(key)
-
-		manager.SetTraceIDGenerator(func() string {
-			return value
-		})
-
-		ctx := context.Background()
-
-		ctx = context.WithValue(ctx, key, "test")
-
-		ctx = manager.Trace(ctx)
-
-		require.Equal(t, value, ctx.Value(key))
-	})
-
-	t.Run("Parse_Context_Nil", func(t *testing.T) {
-		key := "key"
-
-		manager := NewManager(key)
-
-		labels := manager.Parse(nil)
-
-		require.Equal(t, 0, len(labels))
-	})
-
-	t.Run("Parse_Context_Not_Nil", func(t *testing.T) {
-		key := "key"
-
-		manager := NewManager(key)
-
-		ctx := context.Background()
 
 		labels := manager.Parse(ctx)
 
-		require.Equal(t, "", labels[key])
+		require.Equal(t, value, labels[key])
 	})
 
-	t.Run("Parse_Context_Key_Exists", func(t *testing.T) {
+	t.Run("Trace_Parse_Context_Key_Exists", func(t *testing.T) {
 		key := "key"
 		value := "value"
 
 		manager := NewManager(key)
 
+		manager.SetTraceIDGenerator(func() string {
+			return value
+		})
+
 		ctx := context.Background()
 
-		ctx = context.WithValue(ctx, key, value)
+		ctx = manager.TraceWithValue(ctx, key, "test")
+
+		ctx = manager.Trace(ctx)
 
 		labels := manager.Parse(ctx)
 

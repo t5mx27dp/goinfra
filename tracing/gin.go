@@ -1,20 +1,22 @@
 package tracing
 
 import (
-	"context"
-
 	"github.com/gin-gonic/gin"
 )
 
 func GinMiddleware(manager *Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx := manager.Trace(c.Request.Context())
+		ctx := c.Request.Context()
+
+		if c.GetHeader(manager.Key()) == "" {
+			ctx = manager.Trace(ctx)
+		}
 
 		for _, key := range manager.Keys() {
 			if key == manager.Key() {
 				continue
 			}
-			ctx = context.WithValue(ctx, key, c.GetHeader(key))
+			ctx = manager.TraceWithValue(ctx, key, c.GetHeader(key))
 		}
 
 		c.Request = c.Request.WithContext(ctx)

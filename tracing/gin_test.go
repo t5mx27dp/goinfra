@@ -32,8 +32,10 @@ func TestGinMiddleware(t *testing.T) {
 	router.GET("/", func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		require.Equal(t, values[0], ctx.Value(keys[0]))
-		require.Equal(t, values[1], ctx.Value(keys[1]))
+		labels := manager.Parse(ctx)
+
+		require.Equal(t, values[0], labels[keys[0]])
+		require.Equal(t, values[1], labels[keys[1]])
 	})
 
 	server := &http.Server{
