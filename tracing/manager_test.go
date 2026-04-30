@@ -18,7 +18,7 @@ func TestGlobalManager(t *testing.T) {
 
 	SetGlobalManager(manager)
 
-	require.Equal(t, globalManager, GetGlobalManager())
+	require.Equal(t, manager, GetGlobalManager())
 }
 
 func TestManager(t *testing.T) {
