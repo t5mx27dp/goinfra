@@ -11,7 +11,7 @@ import (
 var ErrControllerIsRunning = errors.New("controller is running")
 var ErrAlreadySetSignals = errors.New("already set signals")
 
-type MakeGoroutine func(fn func())
+type MakeGoroutine func(fn func(ctx context.Context))
 
 type Controller struct {
 	app App
@@ -97,10 +97,10 @@ func (c *Controller) Run() error {
 	return nil
 }
 
-func (c *Controller) MakeGoroutine(fn func()) {
+func (c *Controller) MakeGoroutine(fn func(ctx context.Context)) {
 	c.wg.Add(1)
 	go func() {
 		defer c.wg.Done()
-		fn()
+		fn(c.ctx)
 	}()
 }

@@ -65,11 +65,9 @@ func TestController(t *testing.T) {
 		app := &testApp{}
 
 		app.onSetUp = func(ctx context.Context, makeGo MakeGoroutine) error {
-			makeGo(func() {
-				select {
-				case <-ctx.Done():
-					actual++
-				}
+			makeGo(func(ctx context.Context) {
+				<-ctx.Done()
+				actual++
 			})
 
 			return nil
